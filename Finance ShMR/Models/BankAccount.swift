@@ -8,8 +8,8 @@
 import Foundation
 
 struct BankAccount: Identifiable {
-    let id = UUID()
-    let userId: UUID
+    let id: String
+    let userId: String
     var name: String
     var balance: Decimal
     let currency: String

@@ -8,8 +8,8 @@
 import Foundation
 
 struct Transaction: Identifiable {
-    let id: UUID
-    let categoryId: UUID
+    let id: String
+    let categoryId: String
     let amount: Decimal
     let transactionDate: Date
     let comment: String?
@@ -17,8 +17,8 @@ struct Transaction: Identifiable {
     var updatedAt: Date
 
     init(
-        id: UUID = UUID(),
-        categoryId: UUID,
+        id: String,
+        categoryId: String,
         amount: Decimal,
         transactionDate: Date,
         comment: String? = nil,

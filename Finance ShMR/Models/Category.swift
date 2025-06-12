@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Category: Identifiable { // CAN DO CHANGES LIKE NAME OR EMOJI ???
-    let id = UUID()
+struct Category: Identifiable {
+    let id: String
     let name: String
     let emoji: Character
     let direction: Direction
@@ -17,8 +17,6 @@ struct Category: Identifiable { // CAN DO CHANGES LIKE NAME OR EMOJI ???
     }
 }
 
-
-// PARSE OR CODABLE JSON ???
 
 /*extension Category {
     init?(from jsonObject: Any){

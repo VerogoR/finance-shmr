@@ -9,17 +9,25 @@ import Foundation
 
 extension Transaction {
     
+    private static let dateFormatter: ISO8601DateFormatter = {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            return formatter
+        }()
+    
     static func parse(jsonObject: Any) -> Transaction? {
         guard
             let dict = jsonObject as? [String: Any],
-            let idString = dict["id"] as? String,
-            let id = UUID(uuidString: idString),
-            let categoryIdString = dict["categoryId"] as? String,
-            let categoryId = UUID(uuidString: categoryIdString),
-            let amountNumber = dict["amount"] as? NSNumber,
-            let transactionDateTimestamp = dict["transactionDate"] as? TimeInterval,
-            let createdAtTimestamp = dict["createdAt"] as? TimeInterval,
-            let updatedAtTimestamp = dict["updatedAt"] as? TimeInterval
+            let id = dict["id"] as? String,
+            let categoryId = dict["categoryId"] as? String,
+            let amountString = dict["amount"] as? String,
+            let amount = Decimal(string: amountString),
+            let transactionDateString = dict["transactionDate"] as? String,
+            let createdAtString = dict["createdAt"] as? String,
+            let updatedAtString = dict["updatedAt"] as? String,
+            let transactionDate = dateFormatter.date(from: transactionDateString),
+            let createdAt = dateFormatter.date(from: createdAtString),
+            let updatedAt = dateFormatter.date(from: updatedAtString)
         else {
             return nil
         }
@@ -29,22 +37,22 @@ extension Transaction {
         return Transaction(
             id: id,
             categoryId: categoryId,
-            amount: amountNumber.decimalValue,
-            transactionDate: Date(timeIntervalSince1970: transactionDateTimestamp),
+            amount: amount,
+            transactionDate: transactionDate,
             comment: comment,
-            createdAt: Date(timeIntervalSince1970: createdAtTimestamp),
-            updatedAt: Date(timeIntervalSince1970: updatedAtTimestamp)
+            createdAt: createdAt,
+            updatedAt: updatedAt
         )
     }
 
     var jsonObject: Any {
         var dict: [String: Any] = [
-            "id": id.uuidString,
-            "categoryId": categoryId.uuidString,
-            "amount": NSDecimalNumber(decimal: amount),
-            "transactionDate": transactionDate.timeIntervalSince1970,
-            "createdAt": createdAt.timeIntervalSince1970,
-            "updatedAt": updatedAt.timeIntervalSince1970
+            "id": id,
+            "categoryId": categoryId,
+            "amount": "\(amount)",
+            "transactionDate": Self.dateFormatter.string(from: transactionDate),
+            "createdAt": Self.dateFormatter.string(from: createdAt),
+            "updatedAt": Self.dateFormatter.string(from: updatedAt)
         ]
         if let comment = comment {
             dict["comment"] = comment
