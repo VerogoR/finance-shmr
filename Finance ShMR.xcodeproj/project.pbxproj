@@ -6,8 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		BEC4E2932DFC6C5E006A3C6F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BEC4E22A2DF8180B006A3C6F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BEC4E2312DF8180B006A3C6F;
+			remoteInfo = "Finance ShMR";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		BEC4E2322DF8180B006A3C6F /* Finance ShMR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Finance ShMR.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEC4E27E2DFC49C4006A3C6F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		BEC4E28F2DFC6C5E006A3C6F /* Finance ShMRTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Finance ShMRTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +28,22 @@
 			path = "Finance ShMR";
 			sourceTree = "<group>";
 		};
+		BEC4E2902DFC6C5E006A3C6F /* Finance ShMRTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Finance ShMRTests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		BEC4E22F2DF8180B006A3C6F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BEC4E28C2DFC6C5E006A3C6F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,7 +57,9 @@
 			isa = PBXGroup;
 			children = (
 				BEC4E2342DF8180B006A3C6F /* Finance ShMR */,
+				BEC4E2902DFC6C5E006A3C6F /* Finance ShMRTests */,
 				BEC4E2332DF8180B006A3C6F /* Products */,
+				BEC4E27D2DFC49C4006A3C6F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -41,8 +67,17 @@
 			isa = PBXGroup;
 			children = (
 				BEC4E2322DF8180B006A3C6F /* Finance ShMR.app */,
+				BEC4E28F2DFC6C5E006A3C6F /* Finance ShMRTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		BEC4E27D2DFC49C4006A3C6F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BEC4E27E2DFC49C4006A3C6F /* XCTest.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -70,6 +105,29 @@
 			productReference = BEC4E2322DF8180B006A3C6F /* Finance ShMR.app */;
 			productType = "com.apple.product-type.application";
 		};
+		BEC4E28E2DFC6C5E006A3C6F /* Finance ShMRTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BEC4E2952DFC6C5E006A3C6F /* Build configuration list for PBXNativeTarget "Finance ShMRTests" */;
+			buildPhases = (
+				BEC4E28B2DFC6C5E006A3C6F /* Sources */,
+				BEC4E28C2DFC6C5E006A3C6F /* Frameworks */,
+				BEC4E28D2DFC6C5E006A3C6F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BEC4E2942DFC6C5E006A3C6F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BEC4E2902DFC6C5E006A3C6F /* Finance ShMRTests */,
+			);
+			name = "Finance ShMRTests";
+			packageProductDependencies = (
+			);
+			productName = "Finance ShMRTests";
+			productReference = BEC4E28F2DFC6C5E006A3C6F /* Finance ShMRTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +140,10 @@
 				TargetAttributes = {
 					BEC4E2312DF8180B006A3C6F = {
 						CreatedOnToolsVersion = 16.2;
+					};
+					BEC4E28E2DFC6C5E006A3C6F = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = BEC4E2312DF8180B006A3C6F;
 					};
 				};
 			};
@@ -100,12 +162,20 @@
 			projectRoot = "";
 			targets = (
 				BEC4E2312DF8180B006A3C6F /* Finance ShMR */,
+				BEC4E28E2DFC6C5E006A3C6F /* Finance ShMRTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		BEC4E2302DF8180B006A3C6F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BEC4E28D2DFC6C5E006A3C6F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +192,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BEC4E28B2DFC6C5E006A3C6F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BEC4E2942DFC6C5E006A3C6F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BEC4E2312DF8180B006A3C6F /* Finance ShMR */;
+			targetProxy = BEC4E2932DFC6C5E006A3C6F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		BEC4E23E2DF8180D006A3C6F /* Debug */ = {
@@ -300,6 +385,40 @@
 			};
 			name = Release;
 		};
+		BEC4E2962DFC6C5E006A3C6F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "-.Finance-ShMRTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Finance ShMR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Finance ShMR";
+			};
+			name = Debug;
+		};
+		BEC4E2972DFC6C5E006A3C6F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "-.Finance-ShMRTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Finance ShMR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Finance ShMR";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -317,6 +436,15 @@
 			buildConfigurations = (
 				BEC4E2412DF8180D006A3C6F /* Debug */,
 				BEC4E2422DF8180D006A3C6F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BEC4E2952DFC6C5E006A3C6F /* Build configuration list for PBXNativeTarget "Finance ShMRTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEC4E2962DFC6C5E006A3C6F /* Debug */,
+				BEC4E2972DFC6C5E006A3C6F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
