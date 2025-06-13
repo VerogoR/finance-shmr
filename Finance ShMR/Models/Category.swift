@@ -17,29 +17,3 @@ struct Category: Identifiable {
     }
 }
 
-
-/*extension Category {
-    init?(from jsonObject: Any){
-        guard
-            let jsonDict = jsonObject as? [String: Any],
-            let name = jsonDict["name"] as? String,
-            let emojiString = jsonDict["emoji"] as? String,
-            let emoji = emojiString.first,
-            let isIncome = jsonDict["isIncome"] as? Bool
-        else {
-            return nil
-        }
-        self.name = name
-        self.emoji = emoji
-        self.direction = isIncome ? .income : .outcome
-    }
-    
-    var jsonObject: Any {
-        return [
-            "name": name,
-            "emoji": String(emoji),
-            "isIncome": isIncome
-        ]
-    }
-}*/
-
