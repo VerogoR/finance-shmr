@@ -1,10 +1,3 @@
-//
-//  Transaction+JSON.swift
-//  Finance ShMR
-//
-//  Created by Egor Herdziy on 11.06.25.
-//
-
 import Foundation
 
 extension Transaction {
@@ -19,6 +12,7 @@ extension Transaction {
         guard
             let dict = jsonObject as? [String: Any],
             let id = dict["id"] as? String,
+            let accountId = dict["accountId"] as? String,
             let categoryId = dict["categoryId"] as? String,
             let amountString = dict["amount"] as? String,
             let amount = Decimal(string: amountString),
@@ -36,6 +30,7 @@ extension Transaction {
 
         return Transaction(
             id: id,
+            accountId: accountId,
             categoryId: categoryId,
             amount: amount,
             transactionDate: transactionDate,
@@ -48,6 +43,7 @@ extension Transaction {
     var jsonObject: Any {
         var dict: [String: Any] = [
             "id": id,
+            "accountId": accountId,
             "categoryId": categoryId,
             "amount": "\(amount)",
             "transactionDate": Self.dateFormatter.string(from: transactionDate),

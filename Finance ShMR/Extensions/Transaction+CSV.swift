@@ -1,27 +1,21 @@
-//
-//  Transaction+CSV.swift
-//  Finance ShMR
-//
-//  Created by Egor Herdziy on 13.06.25.
-//
-
 import Foundation
 
 extension Transaction {
     
     static func parse(csvLine: String) -> Transaction? {
         let components = csvLine.components(separatedBy: ",")
-        guard components.count >= 7 else {
+        guard components.count == 8 else {
             return nil
         }
         
         let id = components[0]
-        let categoryId = components[1]
-        let amountString = components[2]
-        let transactionDateString = components[3]
-        let commentString = components[4]
-        let createdAtString = components[5]
-        let updatedAtString = components[6]
+        let accountId = components[1]
+        let categoryId = components[2]
+        let amountString = components[3]
+        let transactionDateString = components[4]
+        let commentString = components[5]
+        let createdAtString = components[6]
+        let updatedAtString = components[7]
         
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -37,6 +31,7 @@ extension Transaction {
         
         return Transaction(
             id: id,
+            accountId: accountId,
             categoryId: categoryId,
             amount: amount,
             transactionDate: transactionDate,
@@ -52,6 +47,7 @@ extension Transaction {
         
         let fields: [String] = [
             id,
+            accountId,
             categoryId,
             "\(amount)",
             formatter.string(from: transactionDate),

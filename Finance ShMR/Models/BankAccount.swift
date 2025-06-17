@@ -1,10 +1,3 @@
-//
-//  BankAccount.swift
-//  Finance ShMR
-//
-//  Created by Egor Herdziy on 11.06.25.
-//
-
 import Foundation
 
 struct BankAccount: Identifiable {

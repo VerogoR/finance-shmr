@@ -1,16 +1,10 @@
-//
-//  TransactionsService.swift
-//  Finance ShMR
-//
-//  Created by Egor Herdziy on 12.06.25.
-//
-
 import Foundation
 
 final class TransactionsService {
     private var transactions: [Transaction] = [
         Transaction(
             id: "t1",
+            accountId: "ta1",
             categoryId: "c1i",
             amount: Decimal(string: "1500.00")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-13T08:49:59.025Z")!,
@@ -20,6 +14,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: "t2",
+            accountId: "ta1",
             categoryId: "c2o",
             amount: Decimal(string: "500.00")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-13T08:49:59.025Z")!,

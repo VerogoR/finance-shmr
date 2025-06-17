@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Finance ShMR
-//
-//  Created by Egor Herdziy on 10.06.25.
-//
-
 import SwiftUI
 
 struct ContentView: View {

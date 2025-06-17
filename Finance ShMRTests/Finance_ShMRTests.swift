@@ -1,21 +1,5 @@
-//
-//  Finance_ShMRTests.swift
-//  Finance ShMRTests
-//
-//  Created by Egor Herdziy on 13.06.25.
-//
-
 import Testing
 import Foundation
-
-//struct Finance_ShMRTests {
-//
-//    @Test func example() async throws {
-//        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-//    }
-//
-//}
-
 
 @testable import Finance_ShMR
 
@@ -27,11 +11,13 @@ struct TransactionTests {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
         let transactionId = "tt1"
+        let accountId = "ta1"
         let categoryId = "tc1"
         let now = Date()
         
         let jsonObject: [String: Any] = [
             "id": transactionId,
+            "accountId": accountId,
             "categoryId": categoryId,
             "amount": "1234.56",
             "transactionDate": formatter.string(from: now),
@@ -71,6 +57,7 @@ struct TransactionTests {
     func testJsonObjectGeneration() throws {
         let transaction = Transaction(
             id: "tt2",
+            accountId: "ta2",
             categoryId: "tc2",
             amount: Decimal(string: "789.00")!,
             transactionDate: Date(),
@@ -85,6 +72,7 @@ struct TransactionTests {
                 }
         
         #expect(dict["id"] as? String == transaction.id)
+        #expect(dict["accountId"] as? String == transaction.accountId)
         #expect(dict["categoryId"] as? String == transaction.categoryId)
         #expect(dict["amount"] as? String == "\(transaction.amount)")
         #expect(dict["comment"] as? String == transaction.comment)
