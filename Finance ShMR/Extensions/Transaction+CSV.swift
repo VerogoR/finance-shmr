@@ -1,54 +1,82 @@
 import Foundation
 
 extension Transaction {
-    
-    static func parse(csvLine: String) -> Transaction? {
-        let components = csvLine.components(separatedBy: ",")
-        guard components.count == 8 else {
-            return nil
+    static func parse(from csv: String) -> [Transaction]? {
+        let isoFormatter = ISO8601DateFormatter()
+        
+        let rows = csv.components(separatedBy: .newlines).filter { !$0.isEmpty }
+        guard rows.count > 1 else { return nil }
+        
+        var transactions: [Transaction] = []
+        
+        for row in rows.dropFirst() {
+            let columns = row.components(separatedBy: ",")
+            guard columns.count == 14 else { continue }
+            
+            guard let id = Int(columns[0]),
+                  let accountId = Int(columns[1]),
+                  let balance = Decimal(string: columns[3]),
+                  let categoryId = Int(columns[5]),
+                  let emoji = columns[7].first,
+                  let isIncome = Bool(columns[8]),
+                  let amount = Decimal(string: columns[9]),
+                  let transactionDate = isoFormatter.date(from: columns[10]),
+                  let comment = columns[11].isEmpty ? nil : columns[11],
+                  let createdAt = isoFormatter.date(from: columns[12]),
+                  let updatedAt = isoFormatter.date(from: columns[13])
+            else {
+                return nil
+            }
+            
+            let accountName = columns[2]
+            let currency = columns[4]
+            let categoryName = columns[6]
+            
+            
+            let account = AccountBrief(
+                id: accountId,
+                name: accountName,
+                balance: balance,
+                currency: currency
+            )
+            
+            let category = Category(
+                id: categoryId,
+                name: categoryName,
+                emoji: emoji,
+                isIncome: isIncome
+            )
+            
+            let transaction = Transaction(
+                id: id,
+                account: account,
+                category: category,
+                amount: amount,
+                transactionDate: transactionDate,
+                comment: comment,
+                createdAt: createdAt,
+                updatedAt: updatedAt
+            )
+            transactions.append(transaction)
         }
-        
-        let id = components[0]
-        let accountId = components[1]
-        let categoryId = components[2]
-        let amountString = components[3]
-        let transactionDateString = components[4]
-        let commentString = components[5]
-        let createdAtString = components[6]
-        let updatedAtString = components[7]
-        
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        
-        guard
-            let amount = Decimal(string: amountString),
-            let transactionDate = formatter.date(from: transactionDateString),
-            let createdAt = formatter.date(from: createdAtString),
-            let updatedAt = formatter.date(from: updatedAtString)
-        else {
-            return nil
-        }
-        
-        return Transaction(
-            id: id,
-            accountId: accountId,
-            categoryId: categoryId,
-            amount: amount,
-            transactionDate: transactionDate,
-            comment: commentString.isEmpty ? nil : commentString,
-            createdAt: createdAt,
-            updatedAt: updatedAt
-        )
+        return transactions
     }
+    
     
     var csvLine: String {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
         let fields: [String] = [
-            id,
-            accountId,
-            categoryId,
+            "\(id)",
+            "\(account.id)",
+            account.name,
+            "\(account.balance)",
+            account.currency,
+            "\(category.id)",
+            category.name,
+            "\(category.emoji)",
+            "\(category.isIncome)",
             "\(amount)",
             formatter.string(from: transactionDate),
             comment ?? "",
@@ -59,4 +87,3 @@ extension Transaction {
         return fields.joined(separator: ",")
     }
 }
-

@@ -1,14 +1,22 @@
 import Foundation
 
 final class BankAccountsService {
+    
+    private static let formatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+    
+    
     private var mockAccount = BankAccount(
-        id: "1",
-        userId: "1",
+        id: 1,
+        userId: 1,
         name: "Основной счёт",
         balance: Decimal(string: "1000.00")!,
         currency: "RUB",
-        createdAt: ISO8601DateFormatter().date(from: "2025-06-11T18:08:59.754Z")!,
-        updatedAt: ISO8601DateFormatter().date(from: "2025-06-11T18:08:59.754Z")!
+        createdAt: formatter.date(from: "2025-06-11T18:08:59.754Z")!,
+        updatedAt: formatter.date(from: "2025-06-11T18:08:59.754Z")!
     )
     
     func getBankAccount() async throws -> BankAccount {

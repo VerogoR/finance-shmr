@@ -1,9 +1,9 @@
 import Foundation
 
 struct Transaction: Identifiable {
-    let id: String
-    let accountId: String
-    let categoryId: String
+    let id: Int
+    let account: AccountBrief
+    let category: Category
     let amount: Decimal
     let transactionDate: Date
     let comment: String?

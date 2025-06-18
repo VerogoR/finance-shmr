@@ -3,83 +3,97 @@ import Foundation
 
 @testable import Finance_ShMR
 
-struct TransactionTests {
+struct TransactionJSONTests {
+    
+    var categoriesService = CategoriesService()
+    var bankAccountsService = BankAccountsService()
+    
+    let account: BankAccount
+    let categories: [Finance_ShMR.Category]
+    
+    init() async {
+        
+        account = try! await bankAccountsService.getBankAccount()
+        categories = try! await categoriesService.categories()
+        
+    }
     
     @Test
-    func testParseValidJsonObject() throws {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    func testParseValidJSONObject() {
+        let account = AccountBrief(account: account)
+        let category = categories[0]
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
-        let transactionId = "tt1"
-        let accountId = "ta1"
-        let categoryId = "tc1"
-        let now = Date()
-        
-        let jsonObject: [String: Any] = [
-            "id": transactionId,
-            "accountId": accountId,
-            "categoryId": categoryId,
-            "amount": "1234.56",
-            "transactionDate": formatter.string(from: now),
-            "comment": "Test transaction",
-            "createdAt": formatter.string(from: now),
-            "updatedAt": formatter.string(from: now)
+        let json: [String: Any] = [
+            "id": 1,
+            "account": account,
+            "category": category,
+            "amount": "1000.00",
+            "transactionDate": dateFormatter.string(from: Date(timeIntervalSince1970: 1718650000)),
+            "createdAt": dateFormatter.string(from: Date(timeIntervalSince1970: 1718650100)),
+            "updatedAt": dateFormatter.string(from: Date(timeIntervalSince1970: 1718650200)),
+            "comment": "Зарплата"
         ]
         
-        let transaction = Transaction.parse(jsonObject: jsonObject)
+        let transaction = Transaction.parse(jsonObject: json)
         
         #expect(transaction != nil)
-        #expect(transaction?.id == transactionId)
-        #expect(transaction?.categoryId == categoryId)
-        #expect(transaction?.amount == Decimal(string: "1234.56"))
-        #expect(transaction?.comment == "Test transaction")
-        
-        let lhs = transaction?.transactionDate.timeIntervalSince1970 ?? 0
-        let rhs = now.timeIntervalSince1970
-        let difference = abs(lhs - rhs)
-        #expect(difference < 0.01)
-
-        
+        #expect(transaction?.amount == Decimal(string: "1000.00"))
+        #expect(transaction?.comment == "Зарплата")
+        #expect(transaction?.account.id == account.id)
+        #expect(transaction?.category.id == category.id)
     }
-    
+
     @Test
-    func testParseInvalidJsonObject() {
-        let invalidJsonObject: [String: Any] = [
-            "invalidKey": "invalidValue"
+    func testParseInvalidJSONObject() {
+        let json: [String: Any] = [
+            "id": "notAnInt"
         ]
-        
-        let transaction = Transaction.parse(jsonObject: invalidJsonObject)
-        
+        let transaction = Transaction.parse(jsonObject: json)
         #expect(transaction == nil)
     }
-    
+
     @Test
-    func testJsonObjectGeneration() throws {
+    func testJSONObjectMatchesTransaction() {
+        let account = AccountBrief(account: account)
+        let category = categories[1]
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
         let transaction = Transaction(
-            id: "tt2",
-            accountId: "ta2",
-            categoryId: "tc2",
-            amount: Decimal(string: "789.00")!,
-            transactionDate: Date(),
-            comment: "Sample",
-            createdAt: Date(),
-            updatedAt: Date()
+            id: 1,
+            account: account,
+            category: category,
+            amount: Decimal(string: "750.50")!,
+            transactionDate: Date(timeIntervalSince1970: 1718650000),
+            comment: "Покупка продуктов",
+            createdAt: Date(timeIntervalSince1970: 1718650100),
+            updatedAt: Date(timeIntervalSince1970: 1718650200)
         )
         
-        guard let dict = transaction.jsonObject as? [String: Any] else {
-                    #expect(Bool(false), "jsonObject is not a dictionary")
-                    return
-                }
+        guard let json = transaction.jsonObject as? [String: Any] else {
+            return
+        }
         
-        #expect(dict["id"] as? String == transaction.id)
-        #expect(dict["accountId"] as? String == transaction.accountId)
-        #expect(dict["categoryId"] as? String == transaction.categoryId)
-        #expect(dict["amount"] as? String == "\(transaction.amount)")
-        #expect(dict["comment"] as? String == transaction.comment)
+        #expect(json["id"] as? Int == transaction.id)
+        #expect(json["amount"] as? String == "750.5")
+        #expect(json["comment"] as? String == "Покупка продуктов")
         
-        #expect(dict["transactionDate"] as? String != nil)
-        #expect(dict["createdAt"] as? String != nil)
-        #expect(dict["updatedAt"] as? String != nil)
+        guard let jsonAccount = json["account"] as? AccountBrief else {
+            return
+        }
+        guard let jsonCategory = json["category"] as? Finance_ShMR.Category else {
+            return
+        }
+        
+        #expect(jsonAccount.id == account.id)
+        #expect(jsonAccount.name == account.name)
+        #expect(jsonAccount.currency == account.currency)
+        
+        #expect(jsonCategory.id == category.id)
+        #expect(jsonCategory.name == category.name)
+        #expect(jsonCategory.emoji == category.emoji)
+        #expect(jsonCategory.isIncome == category.isIncome)
     }
 }
-
