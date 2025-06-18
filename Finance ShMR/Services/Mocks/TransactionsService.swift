@@ -1,28 +1,50 @@
 import Foundation
 
 final class TransactionsService {
-    private var transactions: [Transaction] = [
-        Transaction(
-            id: "t1",
-            accountId: "ta1",
-            categoryId: "c1i",
-            amount: Decimal(string: "1500.00")!,
-            transactionDate: ISO8601DateFormatter().date(from: "2025-06-13T08:49:59.025Z")!,
-            comment: "Зарплата",
-            createdAt: ISO8601DateFormatter().date(from: "2025-06-13T08:49:59.025Z")!,
-            updatedAt: ISO8601DateFormatter().date(from: "2025-06-13T08:49:59.025Z")!
-        ),
-        Transaction(
-            id: "t2",
-            accountId: "ta1",
-            categoryId: "c2o",
-            amount: Decimal(string: "500.00")!,
-            transactionDate: ISO8601DateFormatter().date(from: "2025-06-13T08:49:59.025Z")!,
-            comment: "Покупка продуктов",
-            createdAt: ISO8601DateFormatter().date(from: "2025-06-13T08:49:59.025Z")!,
-            updatedAt: ISO8601DateFormatter().date(from: "2025-06-13T08:49:59.025Z")!
-        )
-    ]
+    
+    var categoriesService = CategoriesService()
+    var bankAccountsService = BankAccountsService()
+    
+    private static let dateFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+    
+    private var transactions: [Transaction] = []
+    
+    let account: BankAccount
+    let categories: [Category]
+    
+    init() async {
+        
+        account = try! await bankAccountsService.getBankAccount()
+        categories = try! await categoriesService.categories()
+        
+        
+        transactions = [
+            Transaction(
+                id: 1,
+                account: AccountBrief(account: account),
+                category: categories[0],
+                amount: Decimal(string: "1500.00")!,
+                transactionDate: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
+                comment: "Зарплата",
+                createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
+                updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
+            ),
+            Transaction(
+                id: 2,
+                account: AccountBrief(account: account),
+                category: categories[1],
+                amount: Decimal(string: "500.00")!,
+                transactionDate: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
+                comment: "Покупка продуктов",
+                createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
+                updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
+            )
+        ]
+    }
     
     func transactions(for period: ClosedRange<Date>) async throws -> [Transaction] {
         return transactions.filter { period.contains($0.transactionDate) }
@@ -42,8 +64,7 @@ final class TransactionsService {
         transactions[index] = transaction
     }
     
-    func deleteTransaction(id: String) async throws {
+    func deleteTransaction(id: Int) async throws {
         transactions.removeAll { $0.id == id }
     }
 }
-

@@ -1,8 +1,8 @@
 import Foundation
 
 struct BankAccount: Identifiable {
-    let id: String
-    let userId: String
+    let id: Int
+    let userId: Int
     var name: String
     var balance: Decimal
     let currency: String
