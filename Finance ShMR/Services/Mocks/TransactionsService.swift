@@ -2,14 +2,14 @@ import Foundation
 
 final class TransactionsService {
     
-    var categoriesService = CategoriesService()
-    var bankAccountsService = BankAccountsService()
-    
     private static let dateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
     }()
+    
+    var categoriesService = CategoriesService()
+    var bankAccountsService = BankAccountsService()
     
     private var transactions: [Transaction] = []
     
@@ -46,8 +46,8 @@ final class TransactionsService {
         ]
     }
     
-    func transactions(for period: ClosedRange<Date>) async throws -> [Transaction] {
-        return transactions.filter { period.contains($0.transactionDate) }
+    func transactions(for period: ClosedRange<Date>) async -> [Transaction] {
+        return transactions.filter { period.contains($0.transactionDate.convertedToLocalTime()) }
     }
     
     func createTransaction(_ transaction: Transaction) async throws {
@@ -68,3 +68,11 @@ final class TransactionsService {
         transactions.removeAll { $0.id == id }
     }
 }
+
+extension Date {
+    func convertedToLocalTime() -> Date {
+        let timeZoneOffset = TimeInterval(TimeZone.current.secondsFromGMT(for: self))
+        return self.addingTimeInterval(timeZoneOffset)
+    }
+}
+

@@ -4,10 +4,10 @@ struct ContentView: View {
     var body: some View {
         TabView {
             Tab("Расходы", image: "outcomeTabIcon") {
-                Text("Расходы")
+                TransactionsListView(direction: .outcome)
             }
             Tab("Доходы", image: "incomeTabIcon") {
-                Text("Доходы")
+                TransactionsListView(direction: .income)
             }
             Tab("Счет", image: "accountTabIcon") {
                 Text("Счет")
