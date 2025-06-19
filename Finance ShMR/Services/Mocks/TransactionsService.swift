@@ -28,7 +28,7 @@ final class TransactionsService {
                 account: AccountBrief(account: account),
                 category: categories[0],
                 amount: Decimal(string: "1500.00")!,
-                transactionDate: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
+                transactionDate: Self.dateFormatter.date(from: Self.dateFormatter.string(from: Date()))!,
                 comment: "Зарплата",
                 createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
                 updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
@@ -38,8 +38,28 @@ final class TransactionsService {
                 account: AccountBrief(account: account),
                 category: categories[1],
                 amount: Decimal(string: "500.00")!,
-                transactionDate: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
+                transactionDate: Self.dateFormatter.date(from: Self.dateFormatter.string(from: Date()))!,
                 comment: "Покупка продуктов",
+                createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
+                updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
+            ),
+            Transaction(
+                id: 3,
+                account: AccountBrief(account: account),
+                category: categories[1],
+                amount: Decimal(string: "2500.00")!,
+                transactionDate: Self.dateFormatter.date(from: Self.dateFormatter.string(from: Date()))!,
+                comment: "Аренда квартиры",
+                createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
+                updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
+            ),
+            Transaction(
+                id: 4,
+                account: AccountBrief(account: account),
+                category: categories[2],
+                amount: Decimal(string: "250.00")!,
+                transactionDate: Self.dateFormatter.date(from: Self.dateFormatter.string(from: Date()))!,
+                comment: "На кофе",
                 createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
                 updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
             )
