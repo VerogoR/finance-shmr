@@ -2,8 +2,15 @@ import SwiftUI
 
 struct TransactionsListView: View {
     
+    private enum sortedBy {
+        case date
+        case amount
+    }
+    
+    @State private var currentSorting: sortedBy = .date
+    
     @State private var todaysTransactions: [Transaction] = []
-    @State private var transactionService: TransactionsService?
+    @State private var transactionService = TransactionsService()
     
     let direction: Direction
     private let calendar = Calendar.current
@@ -19,30 +26,44 @@ struct TransactionsListView: View {
         }
     }
     
+    private var summarySection: some View {
+        Section {
+            Picker("Сортировка", selection: $currentSorting){
+                Text("Дата").tag(sortedBy.date)
+                Text("Сумма").tag(sortedBy.amount)
+            }
+            .pickerStyle(.segmented)
+            
+            HStack {
+                Text("Всего")
+                Spacer()
+                Text(String(todayTransactionsValue.formatted(.currency(code: todaysTransactions.first?.account.currency ?? "RUB"))))
+            }
+        }
+    }
+    
+    
+    private var tabsSection: some View {
+        Section(header: Text("Операции")) {
+            ForEach(todaysTransactions.filter( { $0.category.direction == direction } ).sorted(by: currentSorting == .date ? { $0.transactionDate > $1.transactionDate } : { $0.amount > $1.amount })) { transaction in
+                TransactionTab(transaction: transaction)
+            }
+        }
+    }
+    
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
-                Section {
-                    HStack {
-                        Text("Всего")
-                        Spacer()
-                        Text(String(todayTransactionsValue.formatted(.currency(code: transactionService?.account.currency ?? "RUB"))))
-                    }
-                }
-                Section(header: Text("Операции")) {
-                    ForEach(todaysTransactions.filter( { $0.category.direction == direction } )) { transaction in
-                        TransactionTab(transaction: transaction)
-                    }
-                }
+                summarySection
+                tabsSection
             }
             .task {
-                await initializeService()
                 await loadTodaysTransactions()
             }
             .navigationTitle("\(direction == .income ? "Доходы" : "Расходы") сегодня")
             .toolbar {
-                Button {
-                    
+                NavigationLink {
+                    MyHistoryView(direction: direction)
                 } label: {
                     Image(systemName: "clock")
                         .foregroundStyle(Color.indigo)
@@ -51,12 +72,7 @@ struct TransactionsListView: View {
         }
     }
     
-    private func initializeService() async {
-        transactionService = await TransactionsService()
-    }
-    
     private func loadTodaysTransactions() async {
-        guard let transactionService else { return }
         let today = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: today)!
         todaysTransactions = await transactionService.transactions(for: today...endOfDay)
@@ -64,6 +80,7 @@ struct TransactionsListView: View {
 }
 
 struct TransactionTab: View {
+    
     let transaction: Transaction
     
     init(transaction: Transaction) {
@@ -89,7 +106,6 @@ struct TransactionTab: View {
             }
             Spacer()
             Text("\(transaction.amount.formatted(.currency(code: transaction.account.currency)))")
-            
         }
     }
 }
@@ -101,18 +117,3 @@ struct TransactionTab: View {
 #Preview("income") {
     TransactionsListView(direction: .income)
 }
-
-/*
- Section(header: Text("Операции")) {
-     ScrollView {
-         LazyVStack(spacing: 0) {
-             ForEach(todaysTransactions.filter { $0.category.direction == direction }) { transaction in
-                 TransactionTab(transaction: transaction)
-                     .padding(.vertical, 8)
-                     .padding(.horizontal, 20)
-             }
-         }
-     }
-     .listRowInsets(EdgeInsets())
- }
- */
