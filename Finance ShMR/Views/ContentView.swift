@@ -10,7 +10,7 @@ struct ContentView: View {
                 TransactionsListView(direction: .income)
             }
             Tab("Счет", image: "accountTabIcon") {
-                Text("Счет")
+                AccountView()
             }
             Tab("Статьи", image: "categoriesTabIcon") {
                 Text("Статьи")
