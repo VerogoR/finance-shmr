@@ -5,7 +5,7 @@ struct BankAccount: Identifiable {
     let userId: Int
     var name: String
     var balance: Decimal
-    let currency: String
+    var currency: String
     let createdAt: Date
     var updatedAt: Date
 }

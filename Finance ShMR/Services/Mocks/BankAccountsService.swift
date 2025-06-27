@@ -23,13 +23,13 @@ final class BankAccountsService {
         return mockAccount
     }
     
-    func updateBankAccount(balance: Decimal) async throws -> BankAccount {
+    func updateBankAccount(balance: Decimal, currency: String) async throws -> BankAccount {
         mockAccount = BankAccount(
             id: mockAccount.id,
             userId: mockAccount.userId,
             name: mockAccount.name,
             balance: balance,
-            currency: mockAccount.currency,
+            currency: currency,
             createdAt: mockAccount.createdAt,
             updatedAt: Date()
         )
