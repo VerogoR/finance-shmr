@@ -7,13 +7,13 @@ final class CategoryViewModel: ObservableObject {
     
     @MainActor
     func fetchCategories(for direction: Direction) async {
-        categories = try! await service.categories(for: direction) // две секции: доходы / расходы
+        categories = try! await service.categories(for: direction)
     }
     
 }
 
 struct CategoryView: View {
-    @State private var searchText = ""  // Текст поиска
+    @State private var searchText = ""
     @State private var direction: Direction = .outcome
     @State private var showDirectionPicker: Bool = false
     
@@ -24,7 +24,7 @@ struct CategoryView: View {
             return categoryViewModel.categories
         } else {
             return categoryViewModel.categories.filter {
-                $0.name.localizedCaseInsensitiveContains(searchText)
+                $0.name.fuzzyMatch(searchText)
             }
         }
     }
