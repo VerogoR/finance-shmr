@@ -13,7 +13,7 @@ struct ContentView: View {
                 AccountView()
             }
             Tab("Статьи", image: "categoriesTabIcon") {
-                Text("Статьи")
+                CategoryView()
             }
             Tab("Настройки", image: "settingsTabIcon") {
                 Text("Настройки")
