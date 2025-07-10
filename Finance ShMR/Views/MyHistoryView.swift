@@ -101,18 +101,26 @@ struct MyHistoryView: View {
             .navigationTitle("Моя история")
             .navigationBarBackButtonHidden(true)
             .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            HStack {
-                                Image(systemName: "chevron.left")
-                                Text("Назад")
-                            }
-                            .foregroundStyle(.indigo)
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Image(systemName: "chevron.left")
+                            Text("Назад")
                         }
+                        .foregroundStyle(.indigo)
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink {
+                        AnalysisView(direction: direction)
+                            .navigationTitle("Анализ")
+                    } label: {
+                        Image(systemName: "document").foregroundStyle(Color.indigo)
+                    }
+                }
+            }
         }
     }
     
