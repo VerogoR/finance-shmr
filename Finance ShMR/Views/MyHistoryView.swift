@@ -10,7 +10,7 @@ struct MyHistoryView: View {
     @State private var endPeriod: Date
     @State private var startPeriod: Date
     @State private var periodTransactions: [Transaction] = []
-    @State private var transactionService = TransactionsService()
+    @State private var transactionService = TransactionsService.shared
     
     init(direction: Direction) {
         self.direction = direction
@@ -101,18 +101,26 @@ struct MyHistoryView: View {
             .navigationTitle("Моя история")
             .navigationBarBackButtonHidden(true)
             .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            HStack {
-                                Image(systemName: "chevron.left")
-                                Text("Назад")
-                            }
-                            .foregroundStyle(.indigo)
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Image(systemName: "chevron.left")
+                            Text("Назад")
                         }
+                        .foregroundStyle(.indigo)
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink {
+                        AnalysisView(direction: direction)
+                            .navigationTitle("Анализ")
+                    } label: {
+                        Image(systemName: "document").foregroundStyle(Color.indigo)
+                    }
+                }
+            }
         }
     }
     

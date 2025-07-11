@@ -10,7 +10,11 @@ struct TransactionsListView: View {
     @State private var currentSorting: sortedBy = .date
     
     @State private var todaysTransactions: [Transaction] = []
-    @State private var transactionService = TransactionsService()
+    @State private var transactionService = TransactionsService.shared
+    
+    @State private var isShowingEditView: Bool = false
+    
+    @State private var currentTransaction: Transaction?
     
     let direction: Direction
     private let calendar = Calendar.current
@@ -47,15 +51,41 @@ struct TransactionsListView: View {
         Section(header: Text("Операции")) {
             ForEach(todaysTransactions.filter( { $0.category.direction == direction } ).sorted(by: currentSorting == .date ? { $0.transactionDate > $1.transactionDate } : { $0.amount > $1.amount })) { transaction in
                 TransactionTab(transaction: transaction)
+                    .onTapGesture {
+                        currentTransaction = transaction
+                        isShowingEditView = true
+                    }
             }
         }
     }
     
     var body: some View {
         NavigationStack {
-            List {
-                summarySection
-                tabsSection
+            ZStack {
+                List {
+                    summarySection
+                    tabsSection
+                }
+                HStack {
+                    Spacer()
+                    VStack {
+                        Spacer()
+                        Button {
+                            currentTransaction = nil
+                            isShowingEditView = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 56, height: 56)
+                                .background(Color.accentColor)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 4)
+                        }
+                        .padding(.bottom, 24)
+                        .padding(.trailing, 24)
+                    }
+                }
             }
             .task {
                 await loadTodaysTransactions()
@@ -68,6 +98,13 @@ struct TransactionsListView: View {
                     Image(systemName: "clock")
                         .foregroundStyle(Color.indigo)
                 }
+            }
+            .sheet(isPresented: $isShowingEditView, onDismiss: {
+                Task {
+                    await loadTodaysTransactions()
+                }
+            }){
+                TransactionView(direction: direction, currentTransaction)
             }
         }
     }
@@ -106,6 +143,8 @@ struct TransactionTab: View {
             }
             Spacer()
             Text("\(transaction.amount.formatted(.currency(code: transaction.account.currency)))")
+            Image(systemName: "chevron.right")
+                .foregroundStyle(Color.gray)
         }
     }
 }
