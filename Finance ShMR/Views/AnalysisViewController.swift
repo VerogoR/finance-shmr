@@ -7,6 +7,13 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     private let startDatePicker = UIDatePicker()
     private let endDatePicker = UIDatePicker()
     
+    private enum SortOption {
+        case date
+        case amount
+    }
+
+    private var currentSort: SortOption = .date
+    
     private var transactionsService = TransactionsService()
     var direction: Direction = .outcome
     private var transactions: [Transaction] = []
@@ -25,6 +32,9 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
         endDatePicker.date = Date()
         endDatePicker.preferredDatePickerStyle = .compact
         endDatePicker.addTarget(self, action: #selector(endDateChanged), for: .valueChanged)
+        
+        sortSegmentedControl.addTarget(self, action: #selector(sortChanged), for: .valueChanged)
+
         setupTableView()
         Task {
             await loadTransactions()
@@ -34,6 +44,13 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     @objc private func dismissView() {
         self.dismiss(animated: true, completion: nil)
     }
+    
+    private let sortSegmentedControl: UISegmentedControl = {
+        let control = UISegmentedControl(items: ["Дата", "Сумма"])
+        control.selectedSegmentIndex = 0
+        control.translatesAutoresizingMaskIntoConstraints = false
+        return control
+    }()
     
     private func setupTableView() {
         view.addSubview(tableView)
@@ -93,7 +110,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
-            return 3
+            return 4
         } else {
             return transactions.count
         }
@@ -104,18 +121,28 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
             cell.selectionStyle = .none
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-            
-            if indexPath.row == 0 {
+
+            switch indexPath.row {
+            case 0:
                 let stack = createDateStack(nlabel: "Период: начало", picker: startDatePicker)
                 cell.contentView.addSubview(stack)
                 setupStackConstraints(stack, in: cell.contentView)
-                
-            } else if indexPath.row == 1 {
+
+            case 1:
                 let stack = createDateStack(nlabel: "Период: конец", picker: endDatePicker)
                 cell.contentView.addSubview(stack)
                 setupStackConstraints(stack, in: cell.contentView)
+
+            case 2:
+                cell.contentView.addSubview(sortSegmentedControl)
+                NSLayoutConstraint.activate([
+                    sortSegmentedControl.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+                    sortSegmentedControl.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
+                    sortSegmentedControl.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 8),
+                    sortSegmentedControl.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -8)
+                ])
                 
-            } else {
+            default:
                 let titleLabel = UILabel()
                 titleLabel.text = "Сумма"
                 titleLabel.font = .systemFont(ofSize: 16)
@@ -126,9 +153,9 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
                 stack.alignment = .center
                 
                 cell.contentView.addSubview(stack)
-                stack.translatesAutoresizingMaskIntoConstraints = false
                 setupStackConstraints(stack, in: cell.contentView)
             }
+            
             return cell
         } else {
             let transaction = transactions[indexPath.row]
@@ -210,11 +237,32 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
         return start...end
     }
     
+    
+    @objc private func sortChanged() {
+        currentSort = sortSegmentedControl.selectedSegmentIndex == 0 ? .date : .amount
+        transactions.sort {
+            switch currentSort {
+            case .date:
+                return $0.transactionDate > $1.transactionDate
+            case .amount:
+                return $0.amount > $1.amount
+            }
+        }
+        tableView.reloadSections(IndexSet(integer: 1), with: .automatic)
+    }
+    
+    
     private func loadTransactions() async {
         let range = periodRange()
         let all = await transactionsService.transactions(for: range)
         self.transactions = all.filter { $0.category.direction == direction }
-        
+        switch currentSort {
+        case .date:
+            self.transactions.sort { $0.transactionDate > $1.transactionDate }
+        case .amount:
+            self.transactions.sort { $0.amount > $1.amount }
+        }
+
         DispatchQueue.main.async {
             self.updateTotalAmount()
             self.tableView.reloadData()
