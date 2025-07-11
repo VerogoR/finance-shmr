@@ -10,7 +10,7 @@ struct MyHistoryView: View {
     @State private var endPeriod: Date
     @State private var startPeriod: Date
     @State private var periodTransactions: [Transaction] = []
-    @State private var transactionService = TransactionsService()
+    @State private var transactionService = TransactionsService.shared
     
     init(direction: Direction) {
         self.direction = direction

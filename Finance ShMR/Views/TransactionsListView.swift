@@ -10,7 +10,7 @@ struct TransactionsListView: View {
     @State private var currentSorting: sortedBy = .date
     
     @State private var todaysTransactions: [Transaction] = []
-    @State private var transactionService = TransactionsService()
+    @State private var transactionService = TransactionsService.shared
     
     @State private var isShowingEditView: Bool = false
     
@@ -78,7 +78,7 @@ struct TransactionsListView: View {
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
                                 .frame(width: 56, height: 56)
-                                .background(Color.green)
+                                .background(Color.accentColor)
                                 .clipShape(Circle())
                                 .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 4)
                         }
@@ -99,7 +99,11 @@ struct TransactionsListView: View {
                         .foregroundStyle(Color.indigo)
                 }
             }
-            .sheet(isPresented: $isShowingEditView){
+            .sheet(isPresented: $isShowingEditView, onDismiss: {
+                Task {
+                    await loadTodaysTransactions()
+                }
+            }){
                 TransactionView(direction: direction, currentTransaction)
             }
         }

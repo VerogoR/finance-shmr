@@ -14,7 +14,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
 
     private var currentSort: SortOption = .date
     
-    private var transactionsService = TransactionsService()
+    private var transactionsService = TransactionsService.shared
     var direction: Direction = .outcome
     private var transactions: [Transaction] = []
     
@@ -117,10 +117,9 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // убрать всю верстку, только создание ячейки
-        // всю логику убрать
-        
-        // ряды для каждой секции - отдельная функция?
+        // TODO: - убрать всю верстку, только создание ячейки
+        // TODO: - всю логику убрать
+        // TODO: - ряды для каждой секции - отедльная ф-я
         if indexPath.section == 0 {
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
             cell.selectionStyle = .none
@@ -131,7 +130,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
                 let stack = createDateStack(nlabel: "Период: начало", picker: startDatePicker)
                 cell.contentView.addSubview(stack)
                 setupStackConstraints(stack, in: cell.contentView)
-// кастомная ячейка
+                // TODO: - кастомная ячейка
             case 1:
                 let stack = createDateStack(nlabel: "Период: конец", picker: endDatePicker)
                 cell.contentView.addSubview(stack)
@@ -164,11 +163,11 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
         } else {
             let transaction = transactions[indexPath.row]
             guard let cell = tableView.dequeueReusableCell(withIdentifier: "OperationCell", for: indexPath) as? OperationCell else { return UITableViewCell() }
-            // id как статик в ячейке
+            // TODO: - id как статик в ячейке
             let total = transactions.reduce(Decimal(0)) { $0 + $1.amount }
             let percentage: Int
             if total > 0 {
-                let fraction = (transaction.amount / total * 100 as NSDecimalNumber).doubleValue // упростить
+                let fraction = (transaction.amount / total * 100 as NSDecimalNumber).doubleValue // TODO: - упростить
                 percentage = Int(round(fraction))
             } else {
                 percentage = 0
@@ -191,7 +190,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
                 percent: percentage,
                 backgroundColor: backgroundColor
             )
-            // вынести из метода
+            // TODO: - вынести из метода
             return cell
         }
     }
