@@ -117,6 +117,10 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // убрать всю верстку, только создание ячейки
+        // всю логику убрать
+        
+        // ряды для каждой секции - отдельная функция?
         if indexPath.section == 0 {
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
             cell.selectionStyle = .none
@@ -127,7 +131,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
                 let stack = createDateStack(nlabel: "Период: начало", picker: startDatePicker)
                 cell.contentView.addSubview(stack)
                 setupStackConstraints(stack, in: cell.contentView)
-
+// кастомная ячейка
             case 1:
                 let stack = createDateStack(nlabel: "Период: конец", picker: endDatePicker)
                 cell.contentView.addSubview(stack)
@@ -159,12 +163,12 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
             return cell
         } else {
             let transaction = transactions[indexPath.row]
-            let cell = tableView.dequeueReusableCell(withIdentifier: "OperationCell", for: indexPath) as! OperationCell
-            
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "OperationCell", for: indexPath) as? OperationCell else { return UITableViewCell() }
+            // id как статик в ячейке
             let total = transactions.reduce(Decimal(0)) { $0 + $1.amount }
             let percentage: Int
             if total > 0 {
-                let fraction = (transaction.amount / total * 100 as NSDecimalNumber).doubleValue
+                let fraction = (transaction.amount / total * 100 as NSDecimalNumber).doubleValue // упростить
                 percentage = Int(round(fraction))
             } else {
                 percentage = 0
@@ -187,7 +191,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
                 percent: percentage,
                 backgroundColor: backgroundColor
             )
-            
+            // вынести из метода
             return cell
         }
     }
@@ -281,7 +285,15 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
 
 final class OperationCell: UITableViewCell {
     
-    private let iconBackground = UIView()
+    private let iconBackground = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .systemGray5
+        view.layer.cornerRadius = 19
+        view.clipsToBounds = true
+        return view
+    }()
+    
     private let iconLabel = UILabel()
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
@@ -301,10 +313,7 @@ final class OperationCell: UITableViewCell {
     }
     
     private func setupViews() {
-        iconBackground.translatesAutoresizingMaskIntoConstraints = false
-        iconBackground.backgroundColor = .systemGray5
-        iconBackground.layer.cornerRadius = 19
-        iconBackground.clipsToBounds = true
+        
         
         iconLabel.translatesAutoresizingMaskIntoConstraints = false
         iconLabel.font = UIFont.systemFont(ofSize: 20)

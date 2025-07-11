@@ -25,7 +25,7 @@ final class TransactionsService {
                 category: categories[0],
                 amount: Decimal(string: "1500.00")!,
                 transactionDate: Self.dateFormatter.date(from: Self.dateFormatter.string(from: Date()))!,
-                comment: "Зарплата",
+                comment: "",
                 createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
                 updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
             ),
@@ -35,7 +35,7 @@ final class TransactionsService {
                 category: categories[1],
                 amount: Decimal(string: "500.00")!,
                 transactionDate: Self.dateFormatter.date(from: Self.dateFormatter.string(from: Date()))!,
-                comment: "Покупка продуктов",
+                comment: "",
                 createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
                 updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
             ),
@@ -45,7 +45,7 @@ final class TransactionsService {
                 category: categories[1],
                 amount: Decimal(string: "2500.00")!,
                 transactionDate: Self.dateFormatter.date(from: Self.dateFormatter.string(from: Date()))!,
-                comment: "Аренда квартиры",
+                comment: "",
                 createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
                 updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
             ),
@@ -55,7 +55,7 @@ final class TransactionsService {
                 category: categories[2],
                 amount: Decimal(string: "250.00")!,
                 transactionDate: Self.dateFormatter.date(from: Self.dateFormatter.string(from: Date()))!,
-                comment: "На кофе",
+                comment: "",
                 createdAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!,
                 updatedAt: Self.dateFormatter.date(from: "2025-06-13T08:49:59.025Z")!
             ),
