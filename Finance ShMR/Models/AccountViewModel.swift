@@ -17,7 +17,7 @@ class AccountViewModel: ObservableObject {
     @Published var isBalanceHidden = false
     @Published var selectedCurrency: Currency = .rub
 
-    private let service = BankAccountsService()
+    private let service = BankAccountsService.shared
     
     var balance: String {
         get {
@@ -38,28 +38,33 @@ class AccountViewModel: ObservableObject {
     }
 
 
-    func fetchAccount() async {
+    func fetchAccount() async throws {
         do {
             let acc = try await service.getBankAccount()
             account = acc
             balanceInput = Self.formatBalance(acc.balance, currency: acc.currency)
+            selectedCurrency = Currency(rawValue: account!.currency) ?? .rub
         } catch {
-            print("Ошибка загрузки аккаунта: \(error)")
+            throw error
         }
     }
 
-    func saveChanges() async {
+    func saveChanges() async throws {
         guard let newBalance = parseBalanceInput(balanceInput) else {
             print("Неверный формат баланса: \(balanceInput)")
             return
         }
         do {
-            let updated = try await service.updateBankAccount(balance: newBalance, currency: selectedCurrency.rawValue)
-            account = updated
-            balanceInput = Self.formatBalance(updated.balance, currency: account!.currency)
-            balance = newBalance.formatted(.currency(code: account!.currency))
+            let account = try await service.updateBankAccount(
+                withID: account!.id,
+                name: " ",
+                balance: newBalance,
+                currency: selectedCurrency.rawValue
+            )
+            balanceInput = Self.formatBalance(account.balance, currency: account.currency)
+            balance = newBalance.formatted(.currency(code: account.currency))
         } catch {
-            print("Ошибка сохранения: \(error)")
+            throw error
         }
     }
     

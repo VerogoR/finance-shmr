@@ -3,7 +3,7 @@ import SwiftUI
 final class TransactionViewModel: ObservableObject {
     private var categoriesService = CategoriesService()
     private var transactionsService = TransactionsService.shared
-    private var accountServiece = BankAccountsService()
+    private var accountServiece = BankAccountsService.shared
     
     @Published var categories = [Category]()
     @Published var transactions: [Transaction] = []
@@ -29,7 +29,7 @@ final class TransactionViewModel: ObservableObject {
             categories = try await categoriesService.categories()
             account = try await accountServiece.getBankAccount()
             currency = account?.currency ?? ""
-            transactions = await transactionsService.transactions(for: Calendar.current.date(byAdding: .month, value: -1, to: Date())!...Date())
+            transactions = try await transactionsService.transactions(for: Calendar.current.date(byAdding: .month, value: -1, to: Date())!...Date())
         } catch {
             print("Ошибка при загрузке данных: \(error)")
         }
@@ -62,10 +62,6 @@ final class TransactionViewModel: ObservableObject {
             print("Неверный формат баланса: \(balanceInput)")
             return
         }
-        guard combinedDateTime <= Date() else {
-            print("Дата не может быть в будущем")
-            return
-        }
         guard let selectedCategoryName, selectedCategoryName != "-" else {
             print("Категория не выбрана")
             return
@@ -75,9 +71,8 @@ final class TransactionViewModel: ObservableObject {
             return
         }
         do {
-            let updatedAccount = try await accountServiece.updateBankAccount(balance: account!.balance + newBalance, currency: currency)
-            account = updatedAccount
-            balanceInput = Self.formatBalance(updatedAccount.balance, currency: account!.currency)
+            let diff = (newBalance - transaction.amount) * (categories.first(where: { $0.name == selectedCategoryName })!.isIncome ? -1 : 1)
+            balanceInput = Self.formatBalance(account!.balance - diff, currency: account!.currency)
 
             transaction.amount = newBalance
             transaction.category = categories.first(where: { $0.name == selectedCategoryName })!
@@ -93,33 +88,30 @@ final class TransactionViewModel: ObservableObject {
     
     @MainActor
     func createTransaction() async {
-        guard let newBalance = parseBalanceInput(balanceInput) else {
+        guard var newBalance = parseBalanceInput(balanceInput) else {
             print("Неверный формат баланса: \(balanceInput)")
-            return
-        }
-        guard combinedDateTime <= Date() else {
-            print("Дата не может быть в будущем")
             return
         }
         guard let selectedCategoryName, selectedCategoryName != "-" else {
             print("Категория не выбрана")
             return
         }
-        guard let account = account else {
+        guard account != nil else {
             print("Аккаунт не найден")
             return
         }
 
         do {
-            let updatedAccount = try await accountServiece.updateBankAccount(balance: account.balance + newBalance, currency: currency)
-            self.account = updatedAccount
-            balanceInput = Self.formatBalance(updatedAccount.balance, currency: updatedAccount.currency)
+            if categories.first(where: { $0.name == selectedCategoryName })?.isIncome ?? false {
+                newBalance *= -1
+            }
+            balanceInput = Self.formatBalance(abs(newBalance), currency: account!.currency)
 
             let newTransaction = Transaction(
                 id: (transactions.last?.id ?? 0) + 1,
-                account: AccountBrief(account: updatedAccount),
+                account: AccountBrief(account: account!),
                 category: categories.first(where: { $0.name == selectedCategoryName })!,
-                amount: newBalance,
+                amount: abs(newBalance),
                 transactionDate: combinedDateTime,
                 comment: commentInput,
                 createdAt: Date(),
@@ -180,7 +172,7 @@ struct TransactionView: View {
                     }
                     HStack {
                         Text("Сумма")
-                        TextField("balance input", text: $vm.balanceInput)
+                        TextField("", text: $vm.balanceInput)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .foregroundColor(.gray)
@@ -189,17 +181,18 @@ struct TransactionView: View {
                         .onChange(of: vm.selectedDate) { vm.updateCombinedDateTime() }
                     DatePicker("Время", selection: $vm.selectedTime, in: ...Date(), displayedComponents: .hourAndMinute)
                         .onChange(of: vm.selectedTime) { vm.updateCombinedDateTime() }
-                    if vm.commentInput.isEmpty {
-                        ZStack {
-                            HStack {
-                                Text("Комментарий").foregroundColor(.gray)
-                                Spacer()
-                            }
-                            TextField("", text: $vm.commentInput)
-                        }
-                    } else {
-                        TextField("", text: $vm.commentInput)
-                    }
+                    TextField("Комментарий", text: $vm.commentInput)
+//                    if vm.commentInput.isEmpty {
+//                        ZStack {
+//                            HStack {
+//                                Text("Комментарий").foregroundColor(.gray)
+//                                Spacer()
+//                            }
+//                            TextField("", text: $vm.commentInput)
+//                        }
+//                    } else {
+//                        TextField("", text: $vm.commentInput)
+//                    }
                 }
                 if transaction != nil {
                     Section {
@@ -272,10 +265,10 @@ struct TransactionView: View {
             validationMessage = "Некорректно указана сумма операции"
             return false
         }
-        if vm.combinedDateTime > Date() {
-            validationMessage = "Дата не может быть в будущем"
-            return false
-        }
+//        if vm.combinedDateTime > Date() {
+//            validationMessage = "Дата не может быть в будущем"
+//            return false
+//        }
         return true
     }
 }

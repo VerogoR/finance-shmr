@@ -19,4 +19,22 @@ struct AccountBrief: Identifiable, Codable {
         self.balance = balance
         self.currency = currency
     }
+    
+    enum CodingKeys: String, CodingKey {
+        case id, name, balance, currency
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        
+        let balanceString = try container.decode(String.self, forKey: .balance)
+        guard let balanceDecimal = Decimal(string: balanceString) else {
+            throw DecodingError.dataCorruptedError(forKey: .balance, in: container, debugDescription: "Invalid decimal format")
+        }
+        balance = balanceDecimal
+        
+        currency = try container.decode(String.self, forKey: .currency)
+    }
 }
