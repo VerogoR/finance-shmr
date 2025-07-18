@@ -6,7 +6,7 @@ import Foundation
 struct TransactionJSONTests {
     
     var categoriesService = CategoriesService()
-    var bankAccountsService = BankAccountsService()
+    var bankAccountsService = BankAccountsService.shared
     
     let account: BankAccount
     let categories: [Finance_ShMR.Category]

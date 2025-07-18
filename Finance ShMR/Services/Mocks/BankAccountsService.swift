@@ -1,6 +1,6 @@
 import Foundation
 
-final class BankAccountsService {
+final class BankAccountsServiceMock {
     
     private static let formatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()

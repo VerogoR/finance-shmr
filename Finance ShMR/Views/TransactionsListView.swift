@@ -7,6 +7,18 @@ struct TransactionsListView: View {
         case amount
     }
     
+    private struct AddButtonModifier: ViewModifier {
+        func body(content: Content) -> some View {
+            content
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 56, height: 56)
+                .background(Color.accentColor)
+                .clipShape(Circle())
+                .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 4)
+        }
+    }
+    
     @State private var currentSorting: sortedBy = .date
     
     @State private var todaysTransactions: [Transaction] = []
@@ -15,6 +27,8 @@ struct TransactionsListView: View {
     @State private var isShowingEditView: Bool = false
     
     @State private var currentTransaction: Transaction?
+    
+    private var account: BankAccount?
     
     let direction: Direction
     private let calendar = Calendar.current
@@ -41,7 +55,7 @@ struct TransactionsListView: View {
             HStack {
                 Text("Всего")
                 Spacer()
-                Text(String(todayTransactionsValue.formatted(.currency(code: todaysTransactions.first?.account.currency ?? "RUB"))))
+                Text(String(todaysTransactions.isEmpty ? "0" : todayTransactionsValue.formatted(.currency(code: todaysTransactions.first!.account.currency))))
             }
         }
     }
@@ -75,12 +89,7 @@ struct TransactionsListView: View {
                             isShowingEditView = true
                         } label: {
                             Image(systemName: "plus")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 56, height: 56)
-                                .background(Color.accentColor)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 4)
+                                .modifier(AddButtonModifier())
                         }
                         .padding(.bottom, 24)
                         .padding(.trailing, 24)
@@ -112,7 +121,7 @@ struct TransactionsListView: View {
     private func loadTodaysTransactions() async {
         let today = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: today)!
-        todaysTransactions = await transactionService.transactions(for: today...endOfDay)
+        todaysTransactions = try! await transactionService.transactions(for: today...endOfDay)
     }
 }
 

@@ -11,6 +11,8 @@ struct MyHistoryView: View {
     @State private var startPeriod: Date
     @State private var periodTransactions: [Transaction] = []
     @State private var transactionService = TransactionsService.shared
+    @State private var isShowingEditView = false
+    @State private var currentTransaction: Transaction?
     
     init(direction: Direction) {
         self.direction = direction
@@ -62,6 +64,10 @@ struct MyHistoryView: View {
         Section(header: Text("Операции")) {
             ForEach(periodTransactions.filter { $0.category.direction == direction }) { transaction in
                 TransactionTab(transaction: transaction)
+                    .onTapGesture {
+                        currentTransaction = transaction
+                        isShowingEditView = true
+                    }
             }
         }
     }
@@ -70,16 +76,27 @@ struct MyHistoryView: View {
     
     var body: some View {
         NavigationStack {
-            List {
-                datePickersSection
-                transactionsSection
+            ZStack {
+                if !periodTransactions.isEmpty {
+                    List {
+                        datePickersSection
+                        transactionsSection
+                    }
+                }
+                else {
+                    ProgressView("Загрузка...")
+                }
             }
             .task {
-                await loadPeriodTransactions()
+                do {
+                    try await loadPeriodTransactions()
+                } catch {
+                    print("Ошибка при загрузке транзакций: \(error)")
+                }
             }
             .onAppear {
                 Task {
-                    await loadPeriodTransactions()
+                    try await loadPeriodTransactions()
                 }
             }
             .onChange(of: startPeriod) {
@@ -87,7 +104,7 @@ struct MyHistoryView: View {
                     endPeriod = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: startPeriod)!
                 }
                 Task {
-                    await loadPeriodTransactions()
+                    try await loadPeriodTransactions()
                 }
             }
             .onChange(of: endPeriod) {
@@ -95,11 +112,18 @@ struct MyHistoryView: View {
                     startPeriod = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: endPeriod)!
                 }
                 Task {
-                    await loadPeriodTransactions()
+                    try await loadPeriodTransactions()
                 }
             }
             .navigationTitle("Моя история")
             .navigationBarBackButtonHidden(true)
+            .sheet(isPresented: $isShowingEditView, onDismiss: {
+                Task {
+                    try await loadPeriodTransactions()
+                }
+            }){
+                TransactionView(direction: direction, currentTransaction)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
@@ -124,8 +148,8 @@ struct MyHistoryView: View {
         }
     }
     
-    private func loadPeriodTransactions() async {
-        periodTransactions = await transactionService.transactions(for: startPeriod...endPeriod)
+    private func loadPeriodTransactions() async throws {
+        periodTransactions = try await transactionService.transactions(for: startPeriod...endPeriod)
     }
 }
 

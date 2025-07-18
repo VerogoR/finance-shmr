@@ -22,9 +22,24 @@
 		BEC4E28F2DFC6C5E006A3C6F /* Finance ShMRTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Finance ShMRTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BE823D3F2E28053A003B1F1F /* Exceptions for "Finance ShMR" folder in "Finance ShMR" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Services/Mocks/BankAccountsService.swift,
+				Services/Mocks/CategoriesService.swift,
+				Services/Mocks/TransactionsService.swift,
+			);
+			target = BEC4E2312DF8180B006A3C6F /* Finance ShMR */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BEC4E2342DF8180B006A3C6F /* Finance ShMR */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BE823D3F2E28053A003B1F1F /* Exceptions for "Finance ShMR" folder in "Finance ShMR" target */,
+			);
 			path = "Finance ShMR";
 			sourceTree = "<group>";
 		};

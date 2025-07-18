@@ -1,6 +1,6 @@
 import Foundation
 
-final class CategoriesService {
+final class CategoriesServiceMock {
     private let categoriesMock: [Category] = [
         Category(id: 1, name: "Зарплата", emoji: "💰", isIncome: true),
         Category(id: 2, name: "Продукты", emoji: "🛒", isIncome: false),

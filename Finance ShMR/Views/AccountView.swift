@@ -5,6 +5,69 @@ struct AccountView: View {
     @State private var isEditing = false
     @State private var showKeyboard = false
     @State private var showCurrencyPicker = false
+    @State private var errorMessage: String?
+    @State private var showErrorAlert = false
+    
+    var SaveButton: some View {
+        Button {
+            Task {
+                if isEditing {
+                    do {
+                        try await viewModel.saveChanges()
+                    } catch {
+                        errorMessage = "Ошибка сохранения: \(error)"
+                        showErrorAlert = true
+                    }
+                }
+                isEditing.toggle()
+                await fetchAccountWithAlert()
+            }
+        } label: {
+            Text(isEditing ? "Сохранить" : "Редактировать")
+                .foregroundStyle(Color.indigo)
+        }
+    }
+    
+    var BalanceSection: some View {
+        HStack {
+            Text("💰")
+            Text("Баланс")
+            Spacer()
+            if isEditing {
+                TextField("", text: $viewModel.balanceInput)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: 150)
+            } else {
+                if viewModel.isBalanceHidden {
+                    Text("••••")
+                        .transition(.opacity)
+                } else {
+                    Text(viewModel.balance)
+                        .transition(.opacity)
+                }
+            }
+        }
+        .contentShape(Rectangle())
+        .listRowBackground(isEditing ? Color.white : Color.accentColor)
+    }
+    
+    var CurrencySection: some View {
+        HStack {
+            Text("Валюта")
+            Spacer()
+            Text(viewModel.selectedCurrencySymbol).foregroundStyle(isEditing ? Color.gray : Color.primary)
+            isEditing ? Image(systemName: "chevron.right").foregroundStyle(Color.gray) : nil
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if isEditing {
+                showCurrencyPicker = true
+            }
+        }
+        .listRowBackground(isEditing ? Color.white : Color.accentColor.opacity(0.2))
+    }
 
     var body: some View {
         NavigationStack {
@@ -12,69 +75,33 @@ struct AccountView: View {
                 if viewModel.account != nil {
                     List {
                         Section {
-                            HStack {
-                                Text("💰")
-                                Text("Баланс")
-                                Spacer()
-                                if isEditing {
-                                    TextField("", text: $viewModel.balanceInput)
-                                        .keyboardType(.decimalPad)
-                                        .multilineTextAlignment(.trailing)
-                                        .foregroundColor(.gray)
-                                        .frame(maxWidth: 150)
-                                } else {
-                                    if viewModel.isBalanceHidden {
-                                        Text("••••")
-                                            .transition(.opacity)
-                                    } else {
-                                        Text(viewModel.balance)
-                                            .transition(.opacity)
-                                    }
-                                }
-                            }
-                            .contentShape(Rectangle())
-                            .listRowBackground(isEditing ? Color.white : Color.accentColor)
+                            BalanceSection
                         }
                         Section {
-                            HStack {
-                                Text("Валюта")
-                                Spacer()
-                                Text(viewModel.selectedCurrencySymbol).foregroundStyle(isEditing ? Color.gray : Color.primary)
-                                isEditing ? Image(systemName: "chevron.right").foregroundStyle(Color.gray) : nil
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                if isEditing {
-                                    showCurrencyPicker = true
-                                }
-                            }
-                            .listRowBackground(isEditing ? Color.white : Color.accentColor.opacity(0.2))
+                            CurrencySection
                         }
                     }
                     .refreshable {
-                        await viewModel.fetchAccount()
+                        await fetchAccountWithAlert()
                     }
                 } else {
                     ProgressView("Загрузка...")
                         .task {
-                            await viewModel.fetchAccount()
+                            await fetchAccountWithAlert()
                         }
                 }
             }
             .navigationTitle("Мой счёт")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        Task {
-                            if isEditing {
-                                await viewModel.saveChanges()
-                            }
-                            isEditing.toggle()
-                        }
-                    } label: {
-                        Text(isEditing ? "Сохранить" : "Редактировать")
-                            .foregroundStyle(Color.indigo)
-                    }
+                    SaveButton
+                }
+            }
+            .alert("Ошибка", isPresented: $showErrorAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
                 }
             }
             .confirmationDialog("Выберите валюту", isPresented: $showCurrencyPicker, titleVisibility: .visible) {
@@ -91,6 +118,14 @@ struct AccountView: View {
             .onShake {
                 viewModel.toggleBalanceHidden()
             }
+        }
+    }
+    func fetchAccountWithAlert() async {
+        do {
+            try await viewModel.fetchAccount()
+        } catch {
+            errorMessage = "Ошибка загрузки аккаунта: \(error)"
+            showErrorAlert = true
         }
     }
     

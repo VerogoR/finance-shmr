@@ -1,8 +1,8 @@
 import Foundation
 
-final class TransactionsService {
+final class TransactionsServiceMock {
     
-    static let shared = TransactionsService()
+    static let shared = TransactionsServiceMock()
     private init() {}
     
     private static let dateFormatter: ISO8601DateFormatter = {
@@ -12,7 +12,7 @@ final class TransactionsService {
     }()
     
     var categoriesService = CategoriesService()
-    var bankAccountsService = BankAccountsService()
+    var bankAccountsService = BankAccountsService.shared
     
     private var transactions: [Transaction] = []
 

@@ -37,7 +37,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
 
         setupTableView()
         Task {
-            await loadTransactions()
+            try await loadTransactions()
         }
     }
     
@@ -224,14 +224,14 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
         if startDatePicker.date > endDatePicker.date {
             endDatePicker.setDate(startDatePicker.date, animated: true)
         }
-        Task { await loadTransactions() }
+        Task { try await loadTransactions() }
     }
     
     @objc private func endDateChanged() {
         if endDatePicker.date < startDatePicker.date {
             startDatePicker.setDate(endDatePicker.date, animated: true)
         }
-        Task { await loadTransactions() }
+        Task { try await loadTransactions() }
     }
     
     private func periodRange() -> ClosedRange<Date> {
@@ -255,9 +255,9 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     
-    private func loadTransactions() async {
+    private func loadTransactions() async throws {
         let range = periodRange()
-        let all = await transactionsService.transactions(for: range)
+        let all = try await transactionsService.transactions(for: range)
         self.transactions = all.filter { $0.category.direction == direction }
         switch currentSort {
         case .date:
