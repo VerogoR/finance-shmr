@@ -264,15 +264,9 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     
     @objc private func sortChanged() {
         currentSort = sortSegmentedControl.selectedSegmentIndex == 0 ? .date : .amount
-        transactions.sort {
-            switch currentSort {
-            case .date:
-                return $0.transactionDate > $1.transactionDate
-            case .amount:
-                return $0.amount > $1.amount
-            }
+        Task {
+            try await loadTransactions()
         }
-        tableView.reloadSections(IndexSet(integer: 1), with: .automatic)
     }
     
     
@@ -288,13 +282,31 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
         }
 
         let grouped = Dictionary(grouping: transactions, by: { $0.category.name })
-        let entities = grouped.map { (categoryName, group) in
-            Entity(
-                value: group.reduce(Decimal(0)) { $0 + $1.amount },
-                label: categoryName
-            )
+        let entities: [Entity]
+        if currentSort == .amount {
+            entities = grouped.map { (categoryName, group) in
+                Entity(
+                    value: group.reduce(Decimal(0)) { $0 + $1.amount },
+                    label: categoryName
+                )
+            }.sorted { $0.value > $1.value }
+        } else {
+            var categoryOrder = [String]()
+            var categoryValues = [String: Decimal]()
+            
+            for transaction in transactions {
+                let name = transaction.category.name
+                categoryValues[name, default: 0] += transaction.amount
+                if !categoryOrder.contains(name) {
+                    categoryOrder.append(name)
+                }
+            }
+            
+            entities = categoryOrder.compactMap { name in
+                guard let value = categoryValues[name] else { return nil }
+                return Entity(value: value, label: name)
+            }
         }
-        .sorted { $0.value > $1.value }
         
         let maxSegments = 5
         let finalEntities: [Entity]
