@@ -48,11 +48,17 @@ struct AccountChartView: View {
         Chart {
             ForEach(points) { item in
                 BarMark(
-                    x: .value("Date", item.date),
+                    x: .value("Date", item.date, unit: period == .day ? .day : .month),
                     y: .value("Amount", abs(item.amountDouble))
                 )
                 .foregroundStyle(
-                    item.amount < 0 ? Color(.orange) : Color("AccentColor")
+                        selected != nil ?
+                        (item.amount < 0
+                        ? (selected?.id == item.id ? Color.orange : Color.orange.opacity(0.5))
+                        : (selected?.id == item.id ? Color.accentColor : Color.accentColor.opacity(0.5)))
+                        : (item.amount < 0
+                           ? Color.orange
+                           : Color.accentColor)
                 )
                 .clipShape(
                     RoundedRectangle(cornerRadius: 4, style: .continuous)

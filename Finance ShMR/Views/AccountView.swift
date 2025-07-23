@@ -101,23 +101,25 @@ struct AccountView: View {
                         Section {
                             CurrencySection
                         }
-                        Section {
-                            ChartPicker
-                                .listRowBackground(Color.clear)
-                                .onAppear {
-                                    let font = UIFont.systemFont(ofSize: 11)
-                                    let attrs: [NSAttributedString.Key: Any] = [
-                                        .font: font,
-                                        .foregroundColor: UIColor.label
-                                    ]
-                                    UISegmentedControl.appearance().setTitleTextAttributes(attrs, for: .normal)
-                                    UISegmentedControl.appearance().setTitleTextAttributes(attrs, for: .selected)
-                                }
+                        if !isEditing {
+                            Section {
+                                ChartPicker
+                                    .listRowBackground(Color.clear)
+                                    .onAppear {
+                                        let font = UIFont.systemFont(ofSize: 11)
+                                        let attrs: [NSAttributedString.Key: Any] = [
+                                            .font: font,
+                                            .foregroundColor: UIColor.label
+                                        ]
+                                        UISegmentedControl.appearance().setTitleTextAttributes(attrs, for: .normal)
+                                        UISegmentedControl.appearance().setTitleTextAttributes(attrs, for: .selected)
+                                    }
+                            }
+                            Section {
+                                ChartView
+                            }
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
                         }
-                        Section {
-                            ChartView
-                        }
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
                     .refreshable {
                         await fetchAccountWithAlert()
