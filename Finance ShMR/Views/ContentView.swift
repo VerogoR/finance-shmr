@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
+    @State private var isAnimationFinished = false
+    
+    private var MainView: some View {
         TabView {
             Tab("Расходы", image: "outcomeTabIcon") {
                 TransactionsListView(direction: .outcome)
@@ -19,6 +21,19 @@ struct ContentView: View {
                 Text("Настройки")
             }
         }
+    }
+    
+    var body: some View {
+        Group {
+            if isAnimationFinished {
+                MainView
+            } else {
+                LaunchAnimationView(animationName: "animation") {
+                    isAnimationFinished = true
+                }
+            }
+        }
+        .ignoresSafeArea()
     }
 }
 

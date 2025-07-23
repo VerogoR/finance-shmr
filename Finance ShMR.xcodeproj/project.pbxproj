@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE78A60B2E3102E1009CB558 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = BE78A60A2E3102E1009CB558 /* Lottie */; };
 		BE8240092E2E467C003B1F1F /* PieChart in Frameworks */ = {isa = PBXBuildFile; productRef = BE8240082E2E467C003B1F1F /* PieChart */; };
 /* End PBXBuildFile section */
 
@@ -60,6 +61,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BE8240092E2E467C003B1F1F /* PieChart in Frameworks */,
+				BE78A60B2E3102E1009CB558 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +123,7 @@
 			name = "Finance ShMR";
 			packageProductDependencies = (
 				BE8240082E2E467C003B1F1F /* PieChart */,
+				BE78A60A2E3102E1009CB558 /* Lottie */,
 			);
 			productName = "Finance ShMR";
 			productReference = BEC4E2322DF8180B006A3C6F /* Finance ShMR.app */;
@@ -179,6 +182,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				BE8240072E2E467C003B1F1F /* XCLocalSwiftPackageReference "Utilities" */,
+				BE78A6092E3102E1009CB558 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BEC4E2332DF8180B006A3C6F /* Products */;
@@ -484,7 +488,23 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		BE78A6092E3102E1009CB558 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		BE78A60A2E3102E1009CB558 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BE78A6092E3102E1009CB558 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
 		BE8240082E2E467C003B1F1F /* PieChart */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PieChart;
