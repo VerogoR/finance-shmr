@@ -68,6 +68,27 @@ struct AccountView: View {
         }
         .listRowBackground(isEditing ? Color.white : Color.accentColor.opacity(0.2))
     }
+    
+    var ChartPicker: some View {
+        Picker("", selection: $viewModel.chartPeriod) {
+            ForEach(ChartPeriod.allCases) {
+                Text($0.title).tag($0)
+            }
+        }
+        .pickerStyle(.segmented)
+        .scaleEffect(x: 1.35, y: 1.35, anchor: .center)
+        .padding(.horizontal, 27)
+    }
+    
+    var ChartView: some View {
+        AccountChartView(
+            points: viewModel.points,
+            period: viewModel.chartPeriod
+        )
+        .frame(height: 230)
+        .padding(.horizontal, -14)
+        .listRowBackground(Color.clear)
+    }
 
     var body: some View {
         NavigationStack {
@@ -80,16 +101,33 @@ struct AccountView: View {
                         Section {
                             CurrencySection
                         }
+                        Section {
+                            ChartPicker
+                                .listRowBackground(Color.clear)
+                                .onAppear {
+                                    let font = UIFont.systemFont(ofSize: 11)
+                                    let attrs: [NSAttributedString.Key: Any] = [
+                                        .font: font,
+                                        .foregroundColor: UIColor.label
+                                    ]
+                                    UISegmentedControl.appearance().setTitleTextAttributes(attrs, for: .normal)
+                                    UISegmentedControl.appearance().setTitleTextAttributes(attrs, for: .selected)
+                                }
+                        }
+                        Section {
+                            ChartView
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
                     .refreshable {
                         await fetchAccountWithAlert()
                     }
                 } else {
                     ProgressView("Загрузка...")
-                        .task {
-                            await fetchAccountWithAlert()
-                        }
                 }
+            }
+            .task {
+                await fetchAccountWithAlert()
             }
             .navigationTitle("Мой счёт")
             .toolbar {
@@ -123,7 +161,9 @@ struct AccountView: View {
     func fetchAccountWithAlert() async {
         do {
             try await viewModel.fetchAccount()
+            try await viewModel.updateDayMonthPoints()
         } catch {
+            print(error)
             errorMessage = "Ошибка загрузки аккаунта: \(error)"
             showErrorAlert = true
         }

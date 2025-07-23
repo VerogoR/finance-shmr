@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import SwiftUI
 import UIKit
+import Charts
 
 enum Currency: String, CaseIterable, Identifiable {
     case rub = "RUB"
@@ -17,7 +18,17 @@ class AccountViewModel: ObservableObject {
     @Published var isBalanceHidden = false
     @Published var selectedCurrency: Currency = .rub
 
-    private let service = BankAccountsService.shared
+    @Published var chartPeriod: ChartPeriod = .day
+    @Published private var dayPoints:   [BalancePoint] = []
+    @Published private var monthPoints: [BalancePoint] = []
+    
+    var points: [BalancePoint] { chartPeriod == .day ? dayPoints : monthPoints }
+     
+    private let ts = TransactionsService.shared
+    private let cs = CategoriesService()
+    private let bas = BankAccountsService.shared
+    
+    private var incomeCategories: Set<Int> = []
     
     var balance: String {
         get {
@@ -40,10 +51,23 @@ class AccountViewModel: ObservableObject {
 
     func fetchAccount() async throws {
         do {
-            let acc = try await service.getBankAccount()
+            let acc = try await bas.getBankAccount()
             account = acc
             balanceInput = Self.formatBalance(acc.balance, currency: acc.currency)
             selectedCurrency = Currency(rawValue: account!.currency) ?? .rub
+        } catch {
+            throw error
+        }
+    }
+
+    func updateDayMonthPoints() async throws {
+        do {
+            try await loadCategories()
+            async let dayLoad = loadChartData(period: .day)
+            async let monthLoad = loadChartData(period: .month)
+            let (day, month) = try await (dayLoad, monthLoad)
+            dayPoints = day
+            monthPoints = month
         } catch {
             throw error
         }
@@ -55,7 +79,7 @@ class AccountViewModel: ObservableObject {
             return
         }
         do {
-            let account = try await service.updateBankAccount(
+            let account = try await bas.updateBankAccount(
                 withID: account!.id,
                 name: " ",
                 balance: newBalance,
@@ -87,7 +111,7 @@ class AccountViewModel: ObservableObject {
         let cleanedInput = input
             .filter( { !$0.isLetter } )
             .replacingOccurrences(of: "\u{00A0}", with: "")
-            .replacingOccurrences(of: "₽", with: "")    
+            .replacingOccurrences(of: "₽", with: "")
             .replacingOccurrences(of: "$", with: "")
             .replacingOccurrences(of: "€", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -100,5 +124,40 @@ class AccountViewModel: ObservableObject {
         return formatter.number(from: cleanedInput)?.decimalValue
     }
 
+    private func loadCategories() async throws {
+        let cats = try await cs.categories()
+        incomeCategories = Set(
+            cats.filter { $0.isIncome }.map(\.id)
+        )
+    }
 
+    func loadChartData(period: ChartPeriod) async throws -> [BalancePoint] {
+        let end = Calendar.current.startOfDay(for: .now)
+        let (start, count, component): (Date, Int, Calendar.Component) = {
+            switch period {
+            case .day:
+                let start = Calendar.current.date(byAdding: .day, value: -29, to: end)!
+                return (start, 30, .day)
+            case .month:
+                let monthStart = Calendar.current.date(
+                    from: Calendar.current.dateComponents([.year, .month], from: end)
+                )!
+                let start = Calendar.current.date(byAdding: .month, value: -24, to: monthStart)!
+                return (start, 25, .month)
+            }
+        }()
+        
+        let transactions = try await ts.transactions(for: start...Date())
+        let grouped = Dictionary(grouping: transactions) { Calendar.current.dateInterval(of: component, for: $0.transactionDate)!.start }
+        
+        return (0..<count).map { offset in
+            let date = Calendar.current.date(byAdding: component, value: offset, to: start)!
+            let sum = grouped[date]?.reduce(into: Decimal.zero) { acc, tx in
+                let signed = incomeCategories.contains(tx.category.id) ? tx.amount : -tx.amount
+                acc += signed
+            } ?? 0
+            return BalancePoint(date: date, amount: sum)
+        }
+    }
+    
 }
