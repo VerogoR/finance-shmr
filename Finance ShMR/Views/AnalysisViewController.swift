@@ -94,7 +94,11 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return section == 0 ? 0 : 40
+        switch section {
+        case 0: return 0
+        case 1: return 8
+        default: return 40
+        }
     }
     
     private func createPickerField(label: String, picker: UIDatePicker) -> UIStackView {
@@ -169,6 +173,8 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
         } else if indexPath.section == 1 {
             let cell = UITableViewCell()
             cell.selectionStyle = .none
+            cell.backgroundColor = .clear
+            cell.contentView.backgroundColor = .clear
             
             pieChartView.translatesAutoresizingMaskIntoConstraints = false
             cell.contentView.addSubview(pieChartView)
