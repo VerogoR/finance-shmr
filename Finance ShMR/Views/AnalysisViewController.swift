@@ -1,6 +1,9 @@
 import UIKit
+import PieChart
 
 class AnalysisViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    private let pieChartView = PieChartView()
     
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private let amountLabel = UILabel()
@@ -71,14 +74,16 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     // MARK: - Header as Section Header
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.section == 0 {
-            return 50
+        switch indexPath.section {
+        case 0: return 50
+        case 1: return 280
+        case 2: return 62
+        default: return 44
         }
-        return 62
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if section == 1 {
+        if section == 2 {
             return "Операции"
         }
         return nil
@@ -89,7 +94,11 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return section == 0 ? 0 : 40
+        switch section {
+        case 0: return 0
+        case 1: return 8
+        default: return 40
+        }
     }
     
     private func createPickerField(label: String, picker: UIDatePicker) -> UIStackView {
@@ -105,14 +114,15 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     // MARK: - Table Sections & Rows
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+        return 3
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
-            return 4
-        } else {
-            return transactions.count
+        switch section {
+        case 0: return 4
+        case 1: return 1
+        case 2: return transactions.count
+        default: return 0
         }
     }
     
@@ -124,7 +134,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
             let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
             cell.selectionStyle = .none
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-
+            
             switch indexPath.row {
             case 0:
                 let stack = createDateStack(nlabel: "Период: начало", picker: startDatePicker)
@@ -135,7 +145,7 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
                 let stack = createDateStack(nlabel: "Период: конец", picker: endDatePicker)
                 cell.contentView.addSubview(stack)
                 setupStackConstraints(stack, in: cell.contentView)
-
+                
             case 2:
                 cell.contentView.addSubview(sortSegmentedControl)
                 NSLayoutConstraint.activate([
@@ -158,6 +168,23 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
                 cell.contentView.addSubview(stack)
                 setupStackConstraints(stack, in: cell.contentView)
             }
+            
+            return cell
+        } else if indexPath.section == 1 {
+            let cell = UITableViewCell()
+            cell.selectionStyle = .none
+            cell.backgroundColor = .clear
+            cell.contentView.backgroundColor = .clear
+            
+            pieChartView.translatesAutoresizingMaskIntoConstraints = false
+            cell.contentView.addSubview(pieChartView)
+            NSLayoutConstraint.activate([
+                pieChartView.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+                pieChartView.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 12),
+                pieChartView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -12),
+                pieChartView.widthAnchor.constraint(equalToConstant: 250),
+//                pieChartView.heightAnchor.constraint(equalToConstant: 250)
+            ])
             
             return cell
         } else {
@@ -243,15 +270,9 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
     
     @objc private func sortChanged() {
         currentSort = sortSegmentedControl.selectedSegmentIndex == 0 ? .date : .amount
-        transactions.sort {
-            switch currentSort {
-            case .date:
-                return $0.transactionDate > $1.transactionDate
-            case .amount:
-                return $0.amount > $1.amount
-            }
+        Task {
+            try await loadTransactions()
         }
-        tableView.reloadSections(IndexSet(integer: 1), with: .automatic)
     }
     
     
@@ -266,7 +287,46 @@ class AnalysisViewController: UIViewController, UITableViewDelegate, UITableView
             self.transactions.sort { $0.amount > $1.amount }
         }
 
+        let grouped = Dictionary(grouping: transactions, by: { $0.category.name })
+        let entities: [Entity]
+        if currentSort == .amount {
+            entities = grouped.map { (categoryName, group) in
+                Entity(
+                    value: group.reduce(Decimal(0)) { $0 + $1.amount },
+                    label: categoryName
+                )
+            }.sorted { $0.value > $1.value }
+        } else {
+            var categoryOrder = [String]()
+            var categoryValues = [String: Decimal]()
+            
+            for transaction in transactions {
+                let name = transaction.category.name
+                categoryValues[name, default: 0] += transaction.amount
+                if !categoryOrder.contains(name) {
+                    categoryOrder.append(name)
+                }
+            }
+            
+            entities = categoryOrder.compactMap { name in
+                guard let value = categoryValues[name] else { return nil }
+                return Entity(value: value, label: name)
+            }
+        }
+        
+        let maxSegments = 5
+        let finalEntities: [Entity]
+        if entities.count > maxSegments {
+            let topEntities = Array(entities.prefix(maxSegments))
+            let otherValue = entities.dropFirst(maxSegments).reduce(Decimal(0)) { $0 + $1.value }
+            let otherEntity = Entity(value: otherValue, label: "Остальные")
+            finalEntities = topEntities + [otherEntity]
+        } else {
+            finalEntities = entities
+        }
+
         DispatchQueue.main.async {
+            self.pieChartView.setEntities(finalEntities)
             self.updateTotalAmount()
             self.tableView.reloadData()
         }
